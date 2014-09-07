@@ -7,6 +7,7 @@ Menu::Menu(QWidget *parent) :
 
 bool Menu::event(QEvent * e) {
     //FIXME: show tooltips
+    /*
     const QHelpEvent *helpEvent = static_cast<QHelpEvent *>(e);
 
     if (helpEvent->type() == QEvent::ToolTip ||
@@ -18,6 +19,6 @@ bool Menu::event(QEvent * e) {
     }
     else
         QToolTip::hideText();
-
+    */
     return QMenu::event(e);
 }
