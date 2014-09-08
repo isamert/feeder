@@ -15,15 +15,22 @@ QString General::randomString(int charlen) {
 }
 
 QString General::xmlCachePath() {
-    QString cache = combine(QDir::homePath(), ".cache/indicator-rss/xml");
+    QString cache = combine(QDir::homePath(), ".cache/" + qApp->applicationName() + "/xml");
     if(!QFile::exists(cache))
         QDir::root().mkpath(cache);
     return cache;
 }
 
 QString General::iconCachePath() {
-    QString cache = combine(QDir::homePath(), ".cache/indicator-rss/icon");
+    QString cache = combine(QDir::homePath(), ".cache/" + qApp->applicationName() + "/icon");
     if(!QFile::exists(cache))
         QDir::root().mkpath(cache);
     return cache;
+}
+
+QString General::cleanCache() {
+    foreach (QString path, QDir(iconCachePath()).entryList(QDir::NoDotAndDotDot | QDir::Files))
+        QFile::remove(path);
+    foreach (QString path, QDir(xmlCachePath()).entryList(QDir::NoDotAndDotDot | QDir::Files))
+        QFile::remove(path);
 }

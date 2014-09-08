@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QMessageBox>
+#include <QCloseEvent>
 
 #include "feedsource.h"
 #include "rssreader.h"
@@ -47,6 +48,9 @@ public slots:
 
 signals:
     void reloadRequested();
+
+protected:
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // SETTINGSDIALOG_H

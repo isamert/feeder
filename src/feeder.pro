@@ -19,7 +19,8 @@ SOURCES += main.cpp \
     settingsdialog.cpp \
     feedsource.cpp \
     general.cpp \
-    menu.cpp
+    menu.cpp \
+    aboutdialog.cpp
 
 HEADERS  += \
     maintray.h \
@@ -28,7 +29,12 @@ HEADERS  += \
     settingsdialog.h \
     feedsource.h \
     general.h \
-    menu.h
+    menu.h \
+    aboutdialog.h
 
 FORMS += \
-    settingsdialog.ui
+    settingsdialog.ui \
+    aboutdialog.ui
+
+RESOURCES += \
+    resources.qrc

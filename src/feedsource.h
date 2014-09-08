@@ -18,8 +18,12 @@ class FeedSource : public QObject
 
 private:
     QUrl feedUrl;
+    QString currentUpdateFeed;
     QNetworkAccessManager *manager;
     QNetworkAccessManager *iconmanager;
+    QNetworkAccessManager *updatemanager;
+
+
 
 public:
     enum FileType {
@@ -29,21 +33,27 @@ public:
     };
 
     explicit FeedSource(QObject *parent = 0, const QUrl &feedUrl = QUrl());
+    ~FeedSource();
+
     bool downloadFeed();
     bool downloadFeed(const QString &url);
     bool downloadFeed(const QUrl &feedUrl);
     bool downloadIcon();
+    bool updateFeed(const QString &feed);
     static FileType fileType(const QString &filePath);
 
 signals:
     void feedDownloadCompleted(const QString &filePath);
     void iconDownloadCompleted(const QString &iconPath);
+    void feedUpdated(const QString &feed);
 
 private slots:
     void feedDownloaded(QNetworkReply *reply);
     void iconDownloaded(QNetworkReply *reply);
+    void doUpdate(QNetworkReply *reply);
 
 public slots:
+
 };
 
 #endif // FEEDSOURCE_H

@@ -107,6 +107,7 @@ void SettingsDialog::on_btnAdd_clicked() {
     set.setValue("category", ui->comboCategories->currentText());
     set.setValue("limit", ui->lineLimit->text());
     set.setValue("notifications", ui->checkNotifications->isChecked());
+    set.setValue("submenu", ui->checkSubmenu->isChecked());
     set.setValue("icon", ui->lineIcon->text());
     set.endGroup();
 
@@ -115,12 +116,21 @@ void SettingsDialog::on_btnAdd_clicked() {
     ui->lineLimit->setText("10");
     ui->checkNotifications->setChecked(false);
     ui->lineIcon->clear();
+    ui->btnAdd->setEnabled(false);
     this->currentCache = "";
     this->currentType = "";
 
     QMessageBox::information(this, trUtf8("Feed Added"), trUtf8("Your feed added successfully"));
+    this->loadSettings();
     emit this->reloadRequested();
 }
+
+
+void SettingsDialog::closeEvent(QCloseEvent *event) {
+    event->ignore();
+    this->hide();
+}
+
 
 void SettingsDialog::on_lineAdress_returnPressed() {
     ui->btnLoad->click();
@@ -164,6 +174,8 @@ void SettingsDialog::on_btnSave_clicked() {
     set.setValue("invertal", ui->lineUpdateInvertal->text());
     set.setValue("maxlength", ui->lineMaxLength->text());
     set.endGroup();
+
+    emit this->reloadRequested();
 }
 
 void SettingsDialog::on_btnDeleteFeed_clicked() {

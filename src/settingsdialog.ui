@@ -11,13 +11,13 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Settings</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
@@ -202,6 +202,13 @@
            </property>
           </widget>
          </item>
+         <item row="7" column="0" colspan="2">
+          <widget class="QCheckBox" name="checkSubmenu">
+           <property name="text">
+            <string>Add as a submenu</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
       </layout>
@@ -212,26 +219,6 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_7">
        <item row="4" column="1">
-        <spacer name="verticalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>211</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="1">
-        <widget class="Line" name="line">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
         <widget class="QPushButton" name="btnFeedDown">
          <property name="enabled">
           <bool>false</bool>
@@ -251,7 +238,27 @@
          </property>
         </widget>
        </item>
+       <item row="5" column="1">
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>211</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
        <item row="2" column="1">
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
         <widget class="QPushButton" name="btnFeedUp">
          <property name="enabled">
           <bool>false</bool>
@@ -261,8 +268,18 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="0" rowspan="5">
+       <item row="0" column="0" rowspan="6">
         <widget class="QListWidget" name="listFeeds"/>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="btnEditFeed">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Edit</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -362,6 +379,31 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>lineUpdateInvertal</tabstop>
+  <tabstop>lineMaxLength</tabstop>
+  <tabstop>btnSave</tabstop>
+  <tabstop>lineAdress</tabstop>
+  <tabstop>lineTitle</tabstop>
+  <tabstop>btnAdd</tabstop>
+  <tabstop>btnLoad</tabstop>
+  <tabstop>comboCategories</tabstop>
+  <tabstop>lineLimit</tabstop>
+  <tabstop>lineIcon</tabstop>
+  <tabstop>checkNotifications</tabstop>
+  <tabstop>checkSubmenu</tabstop>
+  <tabstop>btnFeedDown</tabstop>
+  <tabstop>btnDeleteFeed</tabstop>
+  <tabstop>btnFeedUp</tabstop>
+  <tabstop>listFeeds</tabstop>
+  <tabstop>btnEditFeed</tabstop>
+  <tabstop>lineNewCategory</tabstop>
+  <tabstop>btnAddNewCategory</tabstop>
+  <tabstop>listCategories</tabstop>
+  <tabstop>btnDeleteCategory</tabstop>
+  <tabstop>btnEditCategory</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -5,11 +5,14 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QApplication>
+#include <QTimer>
 
 #include "menu.h"
 #include "rssreader.h"
 #include "atomreader.h"
 #include "settingsdialog.h"
+#include "aboutdialog.h"
+#include "feedsource.h"
 
 class MainTray : public QSystemTrayIcon
 {
@@ -21,14 +24,17 @@ public:
 
     Menu *menu;
     SettingsDialog *sd;
+    AboutDialog *ad;
+    QTimer *timer;
 
-    void loadItems();
+    void loadFromCache();
     void addDefaultItems();
+    void updateCache();
 
 public slots:
     void reloadFromCache();
-    void reloadAll();
-    void openClickedItem();
+    void refreshAll();
+    void openClickedItem(QAction *act);
 };
 
 #endif // MAINTRAY_H

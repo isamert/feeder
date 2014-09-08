@@ -4,6 +4,7 @@
 #include <QString>
 #include <QDir>
 #include <QSettings>
+#include <QApplication>
 
 class General
 {
@@ -13,6 +14,7 @@ public:
 
     static QString xmlCachePath();
     static QString iconCachePath();
+    static QString cleanCache();
 };
 
 #endif // GENERAL_H

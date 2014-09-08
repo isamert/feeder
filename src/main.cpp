@@ -4,7 +4,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    a.setApplicationName("indicator-rss");
+    a.setApplicationName("feeder");
     a.setApplicationVersion("0.1");
     a.setOrganizationName("isamert");
     a.setOrganizationDomain("http://github.com/isamert");
