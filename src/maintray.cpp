@@ -124,7 +124,7 @@ void MainTray::addDefaultItems() {
 }
 
 void MainTray::updateCache() {
-    //General::cleanCache();
+    General::cleanXmlCache();
 
     QSettings set;
     set.beginGroup("Feeds");
@@ -144,5 +144,9 @@ void MainTray::refreshAll() {
 }
 
 void MainTray::openClickedItem(QAction *act) {
-    qDebug() << act->data().toString();
+    QDesktopServices::openUrl(QUrl(act->data().toString()));
 }
+
+
+
+

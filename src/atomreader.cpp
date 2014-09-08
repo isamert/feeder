@@ -48,7 +48,6 @@ QList<AtomReader::AtomItem> AtomReader::getAtomEntries() {
         QDomNode node = nodeList.item(i);
         QDomElement childElement = node.toElement();
 
-        /* usually, descriptions has some html, so we need to fect that html with other texts */
         QString summary;
         QTextStream tsSummary(&summary);
         childElement.elementsByTagName("summary").at(0).save(tsSummary, 0);

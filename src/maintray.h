@@ -6,6 +6,7 @@
 #include <QMenu>
 #include <QApplication>
 #include <QTimer>
+#include <QDesktopServices>
 
 #include "menu.h"
 #include "rssreader.h"

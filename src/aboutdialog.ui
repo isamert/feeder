@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>434</width>
-    <height>181</height>
+    <height>145</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -111,7 +111,7 @@
      <item>
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>&lt;a href=&quot;https://github.com/isamert/feeder&quot;&gt;Project Page&lt;/a&gt;</string>
+        <string>&lt;a href=&quot;https://github.com/isamert/feeder&quot;&gt;https://github.com/isamert/feeder&lt;/a&gt;</string>
        </property>
       </widget>
      </item>

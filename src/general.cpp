@@ -28,9 +28,17 @@ QString General::iconCachePath() {
     return cache;
 }
 
-QString General::cleanCache() {
-    foreach (QString path, QDir(iconCachePath()).entryList(QDir::NoDotAndDotDot | QDir::Files))
-        QFile::remove(path);
-    foreach (QString path, QDir(xmlCachePath()).entryList(QDir::NoDotAndDotDot | QDir::Files))
-        QFile::remove(path);
+void General::cleanXmlCache() {
+    QDir dir(xmlCachePath());
+    QStringList paths = dir.entryList(QDir::NoDotAndDotDot | QDir::Files);
+    foreach (QString path, paths) {
+        QFile::remove(combine(xmlCachePath(), path));
+    }
+}
+
+void General::cleanIconCache() {
+    QDir dir(iconCachePath());
+    QStringList paths = dir.entryList(QDir::NoDotAndDotDot | QDir::Files);
+    foreach (QString path, paths)
+        QFile::remove(combine(iconCachePath(), path));
 }

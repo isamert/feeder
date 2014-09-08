@@ -3,8 +3,10 @@
 
 #include <QString>
 #include <QDir>
+#include <QFile>
 #include <QSettings>
 #include <QApplication>
+#include <QDebug>
 
 class General
 {
@@ -14,7 +16,8 @@ public:
 
     static QString xmlCachePath();
     static QString iconCachePath();
-    static QString cleanCache();
+    static void cleanXmlCache();
+    static void cleanIconCache();
 };
 
 #endif // GENERAL_H
