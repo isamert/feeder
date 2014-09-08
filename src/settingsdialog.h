@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QMessageBox>
 #include <QCloseEvent>
+#include <QApplication>
 
 #include "feedsource.h"
 #include "rssreader.h"

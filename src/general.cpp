@@ -28,6 +28,10 @@ QString General::iconCachePath() {
     return cache;
 }
 
+QString General::autostartFile() {
+    return combine(combine(QDir::homePath(), ".config/autostart"), "feeder.desktop");
+}
+
 void General::cleanXmlCache() {
     QDir dir(xmlCachePath());
     QStringList paths = dir.entryList(QDir::NoDotAndDotDot | QDir::Files);

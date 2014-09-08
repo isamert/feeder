@@ -6,6 +6,10 @@ AtomReader::AtomReader(QObject *parent) :
     this->document = new QDomDocument();
 }
 
+AtomReader::~AtomReader() {
+    delete this->document;
+}
+
 bool AtomReader::setDocument(const QString &xmlFilePath) {
     QFile file(QDir::cleanPath(xmlFilePath));
 

@@ -11,6 +11,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->lineLimit->setValidator(valid);
     ui->lineLimit->setText("10");
     ui->lineUpdateInvertal->setValidator(valid);
+    ui->lineMaxLength->setValidator(valid);
 
     this->fs = new FeedSource();
     connect(fs, SIGNAL(feedDownloadCompleted(QString)), this, SLOT(loadFile(QString)));
@@ -19,8 +20,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     this->loadSettings();
 }
 
-SettingsDialog::~SettingsDialog()
-{
+SettingsDialog::~SettingsDialog() {
     delete ui;
 }
 
@@ -169,10 +169,38 @@ void SettingsDialog::loadFile(const QString &filePath) {
 }
 
 void SettingsDialog::on_btnSave_clicked() {
+    bool startup = ui->checkStartup->isChecked();
+    if(startup) {
+        if(!QFile::exists(General::autostartFile())) {
+            QString desktopFile = QString("[Desktop Entry]\n"
+                                          "Name=%1\n"
+                                          "Exec=%2\n"
+                                          "Encoding=UTF-8\n"
+                                          "Type=Application\n"
+                                          "X-GNOME-Autostart-enabled=true\n"
+                                          "Icon=%3").arg(qApp->applicationName())
+                                                    .arg(qApp->applicationFilePath())
+                                                    .arg(qApp->applicationName());
+            QFile file(General::autostartFile());
+            if(!file.open(QFile::WriteOnly))
+                ui->checkStartup->setChecked(false);
+            else {
+                QTextStream ts(&file);
+                ts << desktopFile;
+            }
+            file.close();
+        }
+    }
+    else {
+        if(QFile::exists(General::autostartFile()))
+            QFile::remove(General::autostartFile());
+    }
+
     QSettings set;
     set.beginGroup("General");
     set.setValue("invertal", ui->lineUpdateInvertal->text());
     set.setValue("maxlength", ui->lineMaxLength->text());
+    set.setValue("startup", ui->checkStartup->isChecked());
     set.endGroup();
 
     emit this->reloadRequested();

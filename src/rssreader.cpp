@@ -6,6 +6,10 @@ RssReader::RssReader(QObject *parent) :
     this->document = new QDomDocument();
 }
 
+RssReader::~RssReader() {
+    delete this->document;
+}
+
 bool RssReader::setDocument(const QString &xmlFilePath) {
     QFile file(QDir::cleanPath(xmlFilePath));
 

@@ -39,6 +39,8 @@ public:
     };
 
     explicit RssReader(QObject *parent = 0);
+    ~RssReader();
+
     bool setDocument(const QString &xmlFilePath);
     bool setDocumentString(const QString &strDoc);
     ChannelInfo getChannelInfo();
@@ -49,7 +51,6 @@ public:
 signals:
 
 public slots:
-
 };
 
 #endif // RSSREADER_H

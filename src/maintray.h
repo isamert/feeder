@@ -28,14 +28,21 @@ public:
     AboutDialog *ad;
     QTimer *timer;
 
+    QStringList getFeeds();
     void loadFromCache();
     void addDefaultItems();
     void updateCache();
+    void markFeedAsRead(const QString &feed);
+    void markFeedAsUnread(const QString &feed);
 
 public slots:
     void reloadFromCache();
     void refreshAll();
     void openClickedItem(QAction *act);
+
+    void markAllAsRead();
+    void markAllAsUnread();
+    void markFeedFromAction(QAction *act);
 };
 
 #endif // MAINTRAY_H

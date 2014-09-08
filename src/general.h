@@ -16,6 +16,7 @@ public:
 
     static QString xmlCachePath();
     static QString iconCachePath();
+    static QString autostartFile();
     static void cleanXmlCache();
     static void cleanIconCache();
 };

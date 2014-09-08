@@ -35,6 +35,8 @@ public:
     };
 
     explicit AtomReader(QObject *parent = 0);
+    ~AtomReader();
+
     bool setDocument(const QString &xmlFilePath);
     bool setDocumentString(const QString &strDoc);
     ChannelInfo getChannelInfo();
