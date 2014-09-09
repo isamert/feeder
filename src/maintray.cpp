@@ -6,7 +6,6 @@ MainTray::MainTray(QWidget *parent)
     //TODO: order feed list
     //TODO: show notifications
 
-
     this->sd = new SettingsDialog();
     this->ad = new AboutDialog();
     connect(this->sd, SIGNAL(reloadRequested()), this, SLOT(reloadFromCache()));
@@ -35,15 +34,6 @@ MainTray::~MainTray() {
     delete this->ad;
 }
 
-QStringList MainTray::getFeeds() {
-    QSettings set;
-    set.beginGroup("Feeds");
-    QStringList feeds = set.childKeys();
-    set.endGroup();
-
-    return feeds;
-}
-
 void MainTray::reloadFromCache() {
     this->loadFromCache();
     this->addDefaultItems();
@@ -58,7 +48,7 @@ void MainTray::loadFromCache() {
     int maxLength = set.value("maxlength", 35).toInt();
     set.endGroup();
 
-    foreach (QString feed, this->getFeeds()) {
+    foreach (QString feed, General::getFeeds()) {
         set.beginGroup("Feed_" + feed);
 
         QString type = set.value("type", "").toString();
@@ -68,6 +58,9 @@ void MainTray::loadFromCache() {
         QStringList readitems = set.value("readitems", "").toString().split("|||");
         bool submenu = set.value("submenu", false).toBool();
         int limit = set.value("limit").toInt();
+
+        //if(title.count() > maxLength)
+        //    title.remove(maxLength, title.count() - maxLength).append("...");
 
         QMenu *mainAct = this->menu->addMenu(QIcon(icon), title);
 
@@ -95,7 +88,9 @@ void MainTray::loadFromCache() {
 
                     act->setToolTip(entries[i].content);
                     act->setData(entries[i].link);
-                    mainAct->setTitle(QString("(%1) " + title).arg(ar.totalCount()));
+
+                    int unreadCount = ar.totalCount() - readitems.count();
+                    mainAct->setTitle(QString("(%1) " + title).arg(unreadCount));
                 }
             }
         }
@@ -123,6 +118,8 @@ void MainTray::loadFromCache() {
 
                     act->setToolTip(items[i].description);
                     act->setData(items[i].link);
+
+                    int unreadCount = rr.totalCount() - readitems.count();
                     mainAct->setTitle(QString("(%1) " + title).arg(rr.totalCount()));
                 }
             }
@@ -155,13 +152,17 @@ void MainTray::addDefaultItems() {
 
 void MainTray::updateCache() {
     General::cleanXmlCache();
-
-    foreach (QString feed, this->getFeeds()) {
-        FeedSource *fs;
-        fs = new FeedSource();
-        fs->updateFeed(feed);
-        connect(fs, SIGNAL(feedUpdated(QString)), this, SLOT(reloadFromCache()));
+    QStringList feeds = General::getFeeds();
+    if(!feeds.isEmpty()) {
+        foreach (QString feed, feeds) {
+            FeedSource *fs;
+            fs = new FeedSource();
+            fs->updateFeed(feed);
+            connect(fs, SIGNAL(feedUpdated(QString)), this, SLOT(reloadFromCache()));
+        }
     }
+    else
+        this->reloadFromCache();
 }
 
 void MainTray::refreshAll() {
@@ -208,14 +209,14 @@ void MainTray::markFeedAsUnread(const QString &feed) {
 }
 
 void MainTray::markAllAsRead() {
-    foreach (QString feed, this->getFeeds())
+    foreach (QString feed, General::getFeeds())
         this->markFeedAsRead(feed);
 
     this->reloadFromCache();
 }
 
 void MainTray::markAllAsUnread() {
-    foreach (QString feed, this->getFeeds())
+    foreach (QString feed, General::getFeeds())
         this->markFeedAsUnread(feed);
 
     this->reloadFromCache();

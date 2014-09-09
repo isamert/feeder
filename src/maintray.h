@@ -28,7 +28,6 @@ public:
     AboutDialog *ad;
     QTimer *timer;
 
-    QStringList getFeeds();
     void loadFromCache();
     void addDefaultItems();
     void updateCache();

@@ -19,6 +19,8 @@ public:
     static QString autostartFile();
     static void cleanXmlCache();
     static void cleanIconCache();
+
+    static QStringList getFeeds();
 };
 
 #endif // GENERAL_H

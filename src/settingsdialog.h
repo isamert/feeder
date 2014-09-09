@@ -28,6 +28,7 @@ public:
     explicit SettingsDialog(QWidget *parent = 0);
     ~SettingsDialog();
     void loadSettings();
+    void saveFeedOrder();
 
 private slots:
     void on_lineAdress_textChanged(const QString &arg1);
@@ -39,10 +40,10 @@ private slots:
     void on_lineAdress_returnPressed();
     void on_btnSave_clicked();
     void on_listFeeds_itemSelectionChanged();
-
     void on_btnDeleteFeed_clicked();
-
     void on_btnDeleteCategory_clicked();
+    void on_btnFeedUp_clicked();
+    void on_btnFeedDown_clicked();
 
 public slots:
     void loadFile(const QString &filePath);

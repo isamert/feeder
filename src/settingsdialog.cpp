@@ -42,7 +42,7 @@ void SettingsDialog::loadSettings() {
     ui->listFeeds->clear();
 
     set.beginGroup("Feeds");
-    foreach (QString feed, set.childKeys()) {
+    foreach (QString feed, General::getFeeds()) {
         QListWidgetItem *item = new QListWidgetItem(ui->listFeeds);
         item->setText(set.value(feed).toString());
         item->setData(Qt::UserRole, feed);
@@ -229,4 +229,37 @@ void SettingsDialog::on_btnDeleteCategory_clicked() {
     set.endGroup();
 
     this->loadSettings();
+}
+
+void SettingsDialog::saveFeedOrder() {
+    QSettings set;
+    set.beginGroup("FeedOrder");
+    for(int i = 0; i < ui->listFeeds->count(); ++i) {
+        set.setValue(QString::number(i), ui->listFeeds->item(i)->data(Qt::UserRole).toString());
+    }
+    set.endGroup();
+}
+
+void SettingsDialog::on_btnFeedUp_clicked() {
+    int index = ui->listFeeds->currentRow();
+
+    if(index > 0) {
+        QListWidgetItem *lwi = ui->listFeeds->takeItem(index);
+        ui->listFeeds->insertItem(index - 1, lwi);
+        ui->listFeeds->setCurrentRow(index - 1);
+
+        this->saveFeedOrder();
+    }
+}
+
+void SettingsDialog::on_btnFeedDown_clicked() {
+    int index = ui->listFeeds->currentRow();
+
+    if(index < ui->listFeeds->count()) {
+        QListWidgetItem *lwi = ui->listFeeds->takeItem(index);
+        ui->listFeeds->insertItem(index + 1, lwi);
+        ui->listFeeds->setCurrentRow(index + 1);
+
+        this->saveFeedOrder();
+    }
 }

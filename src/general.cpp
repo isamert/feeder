@@ -46,3 +46,12 @@ void General::cleanIconCache() {
     foreach (QString path, paths)
         QFile::remove(combine(iconCachePath(), path));
 }
+
+QStringList General::getFeeds() {
+    QSettings set;
+    set.beginGroup("Feeds");
+    QStringList feeds = set.childKeys();
+    set.endGroup();
+
+    return feeds;
+}
