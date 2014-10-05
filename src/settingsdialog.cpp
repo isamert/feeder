@@ -8,10 +8,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->setupUi(this);
     QIntValidator *valid = new QIntValidator(0, 100, this);
 
-    ui->lineLimit->setValidator(valid);
-    ui->lineLimit->setText("10");
     ui->lineUpdateInvertal->setValidator(valid);
     ui->lineMaxLength->setValidator(valid);
+    ui->lineLimit->setValidator(valid);
+    ui->lineLimit->setText("7");
 
     this->fs = new FeedSource();
     connect(fs, SIGNAL(feedDownloadCompleted(QString)), this, SLOT(loadFile(QString)));
@@ -113,8 +113,9 @@ void SettingsDialog::on_btnAdd_clicked() {
 
     ui->lineAdress->clear();
     ui->lineTitle->clear();
-    ui->lineLimit->setText("10");
+    ui->lineLimit->setText("7");
     ui->checkNotifications->setChecked(false);
+    ui->checkSubmenu->setChecked(false);
     ui->lineIcon->clear();
     ui->btnAdd->setEnabled(false);
     this->currentCache = "";
@@ -216,6 +217,7 @@ void SettingsDialog::on_btnDeleteFeed_clicked() {
     set.remove(feedName);
     set.endGroup();
 
+    ui->listFeeds->setCurrentRow(0);
     this->loadSettings();
 }
 

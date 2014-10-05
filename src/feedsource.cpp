@@ -31,13 +31,17 @@ bool FeedSource::downloadFeed(const QString &url) {
 
 bool FeedSource::downloadFeed(const QUrl &feedUrl) {
     this->feedUrl = feedUrl;
-    this->manager->get(QNetworkRequest(feedUrl));
+    QNetworkReply *reply = this->manager->get(QNetworkRequest(feedUrl));
+    reply->ignoreSslErrors();
+
     return true;
 }
 
 bool FeedSource::downloadIcon() {
     QString url = "http://www.google.com/s2/favicons?domain=" + this->feedUrl.toString();
-    this->iconmanager->get(QNetworkRequest(QUrl(url)));
+    QNetworkReply *reply = this->iconmanager->get(QNetworkRequest(QUrl(url)));
+    reply->ignoreSslErrors();
+
     return true;
 }
 
@@ -49,7 +53,9 @@ bool FeedSource::updateFeed(const QString &feed) {
     QUrl url = QUrl(set.value("url").toString());
     set.endGroup();
 
-    this->updatemanager->get(QNetworkRequest(url));
+    QNetworkReply *reply = this->updatemanager->get(QNetworkRequest(url));
+    reply->ignoreSslErrors();
+
     return true;
 }
 
@@ -98,6 +104,7 @@ void FeedSource::doUpdate(QNetworkReply *reply) {
     set.endGroup();
 
     emit this->feedUpdated(this->currentUpdateFeed);
+
     reply->deleteLater();
     this->deleteLater();
 }

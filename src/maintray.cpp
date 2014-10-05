@@ -5,7 +5,7 @@ MainTray::MainTray(QWidget *parent)
 {
     //TODO: order feed list
     //TODO: show notifications
-
+    //TODO: mark clicked item as read
     this->sd = new SettingsDialog();
     this->ad = new AboutDialog();
     connect(this->sd, SIGNAL(reloadRequested()), this, SLOT(reloadFromCache()));
@@ -55,7 +55,8 @@ void MainTray::loadFromCache() {
         QString title = set.value("title", "").toString();
         QString cache = set.value("cache", "").toString();
         QString icon = set.value("icon", "").toString();
-        QStringList readitems = set.value("readitems", "").toString().split("|||");
+        QString _readitems = set.value("readitems", "").toString();
+        QStringList readitems =  _readitems == "" ? QStringList() : _readitems.split("|||");
         bool submenu = set.value("submenu", false).toBool();
         int limit = set.value("limit").toInt();
 
@@ -63,10 +64,13 @@ void MainTray::loadFromCache() {
         //    title.remove(maxLength, title.count() - maxLength).append("...");
 
         QMenu *mainAct = this->menu->addMenu(QIcon(icon), title);
+        QString mainLink = "";
 
         if(type == "atom") {
             AtomReader ar;
             ar.setDocument(cache);
+
+            mainLink = ar.getChannelInfo().link;
 
             QList<AtomReader::AtomItem> entries = ar.getAtomEntries();
             for(int i = 0; i < limit; ++i) {
@@ -98,6 +102,8 @@ void MainTray::loadFromCache() {
             RssReader rr;
             rr.setDocument(cache);
 
+            mainLink = rr.getChannelInfo().link;
+
             QList<RssReader::RssItem> items = rr.getRssItems();
             for(int i = 0; i < limit; ++i) {
                 if(items.count() > i) {
@@ -120,7 +126,7 @@ void MainTray::loadFromCache() {
                     act->setData(items[i].link);
 
                     int unreadCount = rr.totalCount() - readitems.count();
-                    mainAct->setTitle(QString("(%1) " + title).arg(rr.totalCount()));
+                    mainAct->setTitle(QString("(%1) " + title).arg(unreadCount));
                 }
             }
         }
@@ -128,6 +134,9 @@ void MainTray::loadFromCache() {
         if(!mainAct->actions().isEmpty())
             mainAct->addSeparator();
 
+        QAction *actGoto = mainAct->addAction(trUtf8("Open"));
+        actGoto->setData(mainLink);
+        mainAct->addSeparator();
         QAction *actRead = mainAct->addAction(trUtf8("Mark as read"));
         QAction *actUnread = mainAct->addAction(trUtf8("Mark as unread"));
         actRead->setData("__READ__" + feed);
