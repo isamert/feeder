@@ -45,11 +45,13 @@ private slots:
     void on_btnFeedUp_clicked();
     void on_btnFeedDown_clicked();
 
+    void showAddDialog();
+
 public slots:
     void loadFile(const QString &filePath);
 
 signals:
-    void reloadRequested();
+    void reloadFromCacheRequested();
 
 protected:
     void closeEvent(QCloseEvent *event);

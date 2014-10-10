@@ -123,7 +123,7 @@ void SettingsDialog::on_btnAdd_clicked() {
 
     QMessageBox::information(this, trUtf8("Feed Added"), trUtf8("Your feed added successfully"));
     this->loadSettings();
-    emit this->reloadRequested();
+    emit this->reloadFromCacheRequested();
 }
 
 
@@ -204,18 +204,26 @@ void SettingsDialog::on_btnSave_clicked() {
     set.setValue("startup", ui->checkStartup->isChecked());
     set.endGroup();
 
-    emit this->reloadRequested();
+    emit this->reloadFromCacheRequested();
 }
 
 void SettingsDialog::on_btnDeleteFeed_clicked() {
     QListWidgetItem *curr = ui->listFeeds->currentItem();
     QString feedName = curr->data(Qt::UserRole).toString();
 
+    //delete from Feeds section
     QSettings set;
     set.remove("Feed_" + feedName);
     set.beginGroup("Feeds");
     set.remove(feedName);
     set.endGroup();
+
+    //delete from FeedOrder section
+    set.beginGroup("FeedOrder");
+    foreach (QString order, set.childKeys()) {
+        if(set.value(order) == feedName)
+            set.remove(order);
+    }
 
     ui->listFeeds->setCurrentRow(0);
     this->loadSettings();
@@ -252,6 +260,7 @@ void SettingsDialog::on_btnFeedUp_clicked() {
 
         this->saveFeedOrder();
     }
+    emit this->reloadFromCacheRequested();
 }
 
 void SettingsDialog::on_btnFeedDown_clicked() {
@@ -264,4 +273,10 @@ void SettingsDialog::on_btnFeedDown_clicked() {
 
         this->saveFeedOrder();
     }
+    emit this->reloadFromCacheRequested();
+}
+
+void SettingsDialog::showAddDialog() {
+    ui->tabWidget->setCurrentIndex(1);
+    this->show();
 }

@@ -3,17 +3,21 @@
 MainTray::MainTray(QWidget *parent)
     : QSystemTrayIcon(parent)
 {
-    //TODO: order feed list
     //TODO: show notifications
-    //TODO: mark clicked item as read
-    this->sd = new SettingsDialog();
-    this->ad = new AboutDialog();
-    connect(this->sd, SIGNAL(reloadRequested()), this, SLOT(reloadFromCache()));
+    //TODO: add light theme and dark theme icon
+    this->showMessage("dasdasd", "adsadasd", QSystemTrayIcon::Information, 1000000);
 
     this->menu = new Menu();
     connect(this->menu, SIGNAL(triggered(QAction*)), this, SLOT(openClickedItem(QAction*)));
 
+    QAction *actLoading = this->menu->addAction(trUtf8("Loading..."));
+    actLoading->setEnabled(false);
+
+    this->sd = new SettingsDialog();
+    this->ad = new AboutDialog();
+    connect(this->sd, SIGNAL(reloadFromCacheRequested()), this, SLOT(reloadFromCache()));
     this->setIcon(QIcon(":/images/feed-32x32.png"));
+
     this->setContextMenu(this->menu);
 
     QSettings set;
@@ -21,11 +25,13 @@ MainTray::MainTray(QWidget *parent)
     int minute = set.value("invertal", 30).toInt();
     set.endGroup();
 
+    this->refreshAll();
+
+    actLoading->deleteLater();
+
     this->timer = new QTimer();
     connect(this->timer, SIGNAL(timeout()), this, SLOT(refreshAll()));
     this->timer->start((1000 * 60) * minute);
-
-    this->refreshAll();
 }
 
 MainTray::~MainTray() {
@@ -77,23 +83,26 @@ void MainTray::loadFromCache() {
                 if(entries.count() > i) {
                     QString subTitle = entries[i].title;
 
+                    QAction *act;
+
                     if(readitems.contains(subTitle))
                         continue;
 
                     if(subTitle.count() > maxLength)
                         subTitle.remove(maxLength, subTitle.count() - maxLength).append("...");
 
-                    QAction *act;
-
                     if(submenu)
                         act = mainAct->addAction(QIcon(), subTitle);
                     else
                         act = this->menu->addAction(QIcon(), "\t" + subTitle);
 
-                    act->setToolTip(entries[i].content);
-                    act->setData(entries[i].link);
+                    QStringList data; //(feedname, link)
+                    data << feed << entries[i].link;
+                    act->setData(data);
 
-                    int unreadCount = ar.totalCount() - readitems.count();
+                    act->setToolTip(entries[i].title);
+
+                    int unreadCount = readitems.count() == 0 ? ar.totalCount() - readitems.count():ar.totalCount() - readitems.count() + 1;
                     mainAct->setTitle(QString("(%1) " + title).arg(unreadCount));
                 }
             }
@@ -109,23 +118,26 @@ void MainTray::loadFromCache() {
                 if(items.count() > i) {
                     QString subTitle = items[i].title;
 
+                    QAction *act;
+
                     if(readitems.contains(subTitle))
                         continue;
 
                     if(subTitle.count() > maxLength)
                         subTitle.remove(maxLength, subTitle.count() - maxLength).append("...");
 
-                    QAction *act;
-
                     if(submenu)
                         act = mainAct->addAction(QIcon(), subTitle);
                     else
                         act = this->menu->addAction(QIcon(), "\t" + subTitle);
 
-                    act->setToolTip(items[i].description);
-                    act->setData(items[i].link);
+                    QStringList data; //(feedname, link)
+                    data << feed << items[i].link;
+                    act->setData(data);
 
-                    int unreadCount = rr.totalCount() - readitems.count();
+                    act->setToolTip(items[i].title);
+
+                    int unreadCount = readitems.count() == 0 ? rr.totalCount() - readitems.count():rr.totalCount() - readitems.count() + 1;
                     mainAct->setTitle(QString("(%1) " + title).arg(unreadCount));
                 }
             }
@@ -139,8 +151,8 @@ void MainTray::loadFromCache() {
         mainAct->addSeparator();
         QAction *actRead = mainAct->addAction(trUtf8("Mark as read"));
         QAction *actUnread = mainAct->addAction(trUtf8("Mark as unread"));
-        actRead->setData("__READ__" + feed);
-        actUnread->setData("__UNREAD__" + feed);
+        actRead->setData(QStringList("__READ__" + feed));
+        actUnread->setData(QStringList("__UNREAD__" + feed));
 
         connect(mainAct, SIGNAL(triggered(QAction*)), this, SLOT(markFeedFromAction(QAction*)));
 
@@ -154,6 +166,7 @@ void MainTray::addDefaultItems() {
     this->menu->addAction(trUtf8("Mark all as read"), this, SLOT(markAllAsRead()));
     this->menu->addAction(trUtf8("Mark all as unread"), this, SLOT(markAllAsUnread()));
     this->menu->addSeparator();
+    this->menu->addAction(trUtf8("Add Feed Source"), this->sd, SLOT(showAddDialog()));
     this->menu->addAction(trUtf8("Settings"), this->sd, SLOT(show()));
     this->menu->addAction(trUtf8("About"), this->ad, SLOT(show()));
     this->menu->addAction(trUtf8("Quit"), qApp, SLOT(quit()));
@@ -232,20 +245,43 @@ void MainTray::markAllAsUnread() {
 }
 
 void MainTray::markFeedFromAction(QAction *act) {
-    QString data = act->data().toString();
+    QStringList data = act->data().toStringList();
+    QString action = data[0];
 
-    if(data.startsWith("__READ__"))
-        this->markFeedAsRead(data.remove("__READ__"));
-    else if(data.startsWith("__UNREAD__"))
-        this->markFeedAsUnread(data.remove("__UNREAD__"));
+    if(action.startsWith("__READ__"))
+        this->markFeedAsRead(action.remove("__READ__"));
+    else if(action.startsWith("__UNREAD__"))
+        this->markFeedAsUnread(action.remove("__UNREAD__"));
+
+    this->reloadFromCache();
+}
+
+void MainTray::markFeedItemAsRead(const QString &feed, const QString &itemName) {
+    QSettings set;
+    set.beginGroup("Feed_" + feed);
+
+    QString readlist = set.value("readitems", QStringList()).toString();
+    readlist += itemName + "|||";
+    set.setValue("readitems", readlist);
+    set.endGroup();
 
     this->reloadFromCache();
 }
 
 void MainTray::openClickedItem(QAction *act) {
-    QString data = act->data().toString();
+    const QStringList data = act->data().toStringList();
 
-    if(!data.startsWith("__READ__") || !data.startsWith("__UNREAD__"))
-        QDesktopServices::openUrl(QUrl(act->data().toString()));
+    if(data.count() <= 1)
+        return;
+
+    QString url = data[1];
+    QString feed = data[0];
+
+    if(!feed.startsWith("__READ__") || !feed.startsWith("__UNREAD__")) {
+        QDesktopServices::openUrl(QUrl(url));
+
+        QString fullName = act->toolTip();
+        this->markFeedItemAsRead(feed, fullName);
+    }
 }
 

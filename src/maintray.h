@@ -33,6 +33,7 @@ public:
     void updateCache();
     void markFeedAsRead(const QString &feed);
     void markFeedAsUnread(const QString &feed);
+    void markFeedItemAsRead(const QString &feed, const QString &itemName);
 
 public slots:
     void reloadFromCache();

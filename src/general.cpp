@@ -49,9 +49,13 @@ void General::cleanIconCache() {
 
 QStringList General::getFeeds() {
     QSettings set;
-    set.beginGroup("Feeds");
-    QStringList feeds = set.childKeys();
-    set.endGroup();
+    set.beginGroup("FeedOrder");
+    QStringList feeds_ = set.childKeys();
+    feeds_.sort();
 
+    QStringList feeds;
+    foreach (QString feed, feeds_)
+        feeds.append(set.value(feed).toString());
+    set.endGroup();
     return feeds;
 }
