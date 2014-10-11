@@ -261,10 +261,8 @@ void SettingsDialog::saveFeedOrder() {
     QSettings set;
     set.remove("FeedOrder");
     set.beginGroup("FeedOrder");
-    for(int i = 0; i < ui->listFeeds->count(); ++i) {
+    for(int i = 0; i < ui->listFeeds->count(); ++i)
         set.setValue(QString::number(i), ui->listFeeds->item(i)->data(Qt::UserRole).toString());
-        qDebug() << ui->listFeeds->item(i)->data(Qt::UserRole).toString();
-    }
     set.endGroup();
 }
 
