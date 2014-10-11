@@ -99,6 +99,20 @@ void SettingsDialog::on_btnAdd_clicked() {
     set.setValue(group, ui->lineTitle->text());
     set.endGroup();
 
+    //add to order
+    set.beginGroup("FeedOrder");
+    QStringList orders = set.childKeys();
+    orders.sort();
+
+    int itemOrder;
+    if(orders.isEmpty())
+        itemOrder = 0;
+    else
+        itemOrder = orders.last().toInt() + 1;
+
+    set.setValue(QString::number(itemOrder), group);
+    set.endGroup();
+
     set.beginGroup("Feed_" + group);
     set.setValue("url", ui->lineAdress->text());
     set.setValue("title", ui->lineTitle->text());
@@ -227,6 +241,8 @@ void SettingsDialog::on_btnDeleteFeed_clicked() {
 
     ui->listFeeds->setCurrentRow(0);
     this->loadSettings();
+
+    emit this->reloadFromCacheRequested();
 }
 
 void SettingsDialog::on_btnDeleteCategory_clicked() {
@@ -243,9 +259,11 @@ void SettingsDialog::on_btnDeleteCategory_clicked() {
 
 void SettingsDialog::saveFeedOrder() {
     QSettings set;
+    set.remove("FeedOrder");
     set.beginGroup("FeedOrder");
     for(int i = 0; i < ui->listFeeds->count(); ++i) {
         set.setValue(QString::number(i), ui->listFeeds->item(i)->data(Qt::UserRole).toString());
+        qDebug() << ui->listFeeds->item(i)->data(Qt::UserRole).toString();
     }
     set.endGroup();
 }
@@ -259,21 +277,21 @@ void SettingsDialog::on_btnFeedUp_clicked() {
         ui->listFeeds->setCurrentRow(index - 1);
 
         this->saveFeedOrder();
+        emit this->reloadFromCacheRequested();
     }
-    emit this->reloadFromCacheRequested();
 }
 
 void SettingsDialog::on_btnFeedDown_clicked() {
     int index = ui->listFeeds->currentRow();
 
-    if(index < ui->listFeeds->count()) {
+    if(index < ui->listFeeds->count() - 1) {
         QListWidgetItem *lwi = ui->listFeeds->takeItem(index);
         ui->listFeeds->insertItem(index + 1, lwi);
         ui->listFeeds->setCurrentRow(index + 1);
 
         this->saveFeedOrder();
+        emit this->reloadFromCacheRequested();
     }
-    emit this->reloadFromCacheRequested();
 }
 
 void SettingsDialog::showAddDialog() {

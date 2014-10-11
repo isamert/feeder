@@ -5,13 +5,9 @@ MainTray::MainTray(QWidget *parent)
 {
     //TODO: show notifications
     //TODO: add light theme and dark theme icon
-    this->showMessage("dasdasd", "adsadasd", QSystemTrayIcon::Information, 1000000);
-
+    //TODO: edit feeds
     this->menu = new Menu();
     connect(this->menu, SIGNAL(triggered(QAction*)), this, SLOT(openClickedItem(QAction*)));
-
-    QAction *actLoading = this->menu->addAction(trUtf8("Loading..."));
-    actLoading->setEnabled(false);
 
     this->sd = new SettingsDialog();
     this->ad = new AboutDialog();
@@ -26,8 +22,6 @@ MainTray::MainTray(QWidget *parent)
     set.endGroup();
 
     this->refreshAll();
-
-    actLoading->deleteLater();
 
     this->timer = new QTimer();
     connect(this->timer, SIGNAL(timeout()), this, SLOT(refreshAll()));
