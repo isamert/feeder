@@ -6,6 +6,13 @@ MainTray::MainTray(QWidget *parent)
     //TODO: show notifications
     //TODO: add light theme and dark theme icon
     //TODO: edit feeds
+
+#ifdef Q_WS_X11
+    SPACE = "\t";
+#elif Q_OS_WIN32
+    SPACE = "     ";
+#endif
+
     this->menu = new Menu();
     connect(this->menu, SIGNAL(triggered(QAction*)), this, SLOT(openClickedItem(QAction*)));
 
@@ -88,7 +95,7 @@ void MainTray::loadFromCache() {
                     if(submenu)
                         act = mainAct->addAction(QIcon(), subTitle);
                     else
-                        act = this->menu->addAction(QIcon(), "\t" + subTitle);
+                        act = this->menu->addAction(QIcon(), SPACE + subTitle);
 
                     QStringList data; //(feedname, link)
                     data << feed << entries[i].link;
@@ -123,7 +130,7 @@ void MainTray::loadFromCache() {
                     if(submenu)
                         act = mainAct->addAction(QIcon(), subTitle);
                     else
-                        act = this->menu->addAction(QIcon(), "\t" + subTitle);
+                        act = this->menu->addAction(QIcon(), SPACE + subTitle);
 
                     QStringList data; //(feedname, link)
                     data << feed << items[i].link;
