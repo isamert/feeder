@@ -11,6 +11,20 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = feeder
 TEMPLATE = app
 
+target.path = /usr/bin
+
+#-------------------------------------------------
+#
+# Install for Linux
+#
+#-------------------------------------------------
+desktop.files = ../files/$${TARGET}.desktop
+desktop.path = /usr/share/applications
+
+icon.files = ../files/$${TARGET}.png
+icon.path = /usr/share/pixmaps
+
+INSTALLS += target desktop icon
 
 SOURCES += main.cpp \
     maintray.cpp \
@@ -38,3 +52,5 @@ FORMS += \
 
 RESOURCES += \
     resources.qrc
+
+

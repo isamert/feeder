@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Feeder
+Icon=feeder
+Exec=feeder
+Comment=A simple rss/atom reader
+Categories=Utility;
+Terminal=false
+StartupWMClass=feeder

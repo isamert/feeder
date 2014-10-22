@@ -265,6 +265,8 @@ void SettingsDialog::on_btnDeleteFeed_clicked() {
 void SettingsDialog::on_btnDeleteCategory_clicked() {
     //TODO: remove all sub-feeds
     QListWidgetItem *curr = ui->listCategories->currentItem();
+    if(curr == NULL)
+        return;
 
     QSettings set;
     set.beginGroup("Categories");
