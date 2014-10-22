@@ -32,6 +32,7 @@ void SettingsDialog::loadSettings() {
     ui->listCategories->clear();
 
     set.beginGroup("Categories");
+    ui->comboCategories->addItem(trUtf8("Empty"));
     foreach(QString cat, set.childKeys()) {
         ui->comboCategories->addItem(cat);
         ui->listCategories->addItem(cat);
@@ -54,6 +55,7 @@ void SettingsDialog::loadSettings() {
     set.beginGroup("General");
     ui->lineUpdateInvertal->setText(set.value("invertal", "30").toString());
     ui->lineMaxLength->setText(set.value("maxlength", "35").toString());
+    ui->checkCategories->setChecked(set.value("subcategory", false).toBool());
     set.endGroup();
 
 }
@@ -92,8 +94,16 @@ void SettingsDialog::on_btnAddNewCategory_clicked() {
 }
 
 void SettingsDialog::on_btnAdd_clicked() {
-    QSettings set;
     QString group = ui->lineTitle->text().replace(" ", "").toUpper();
+
+    foreach (QString var, General::getFeeds()) {
+        if(var == group) {
+            QMessageBox::warning(this, trUtf8("Cannot Add Feed"), trUtf8("You have same feed already!"));
+            return;
+        }
+    }
+
+    QSettings set;
 
     set.beginGroup("Feeds");
     set.setValue(group, ui->lineTitle->text());
@@ -118,7 +128,10 @@ void SettingsDialog::on_btnAdd_clicked() {
     set.setValue("title", ui->lineTitle->text());
     set.setValue("type", this->currentType);
     set.setValue("cache", this->currentCache);
-    set.setValue("category", ui->comboCategories->currentText());
+    QString catname = ui->comboCategories->currentText();
+    if(catname == trUtf8("Empty"))
+        catname = "";
+    set.setValue("category", catname);
     set.setValue("limit", ui->lineLimit->text());
     set.setValue("notifications", ui->checkNotifications->isChecked());
     set.setValue("submenu", ui->checkSubmenu->isChecked());
@@ -216,6 +229,7 @@ void SettingsDialog::on_btnSave_clicked() {
     set.setValue("invertal", ui->lineUpdateInvertal->text());
     set.setValue("maxlength", ui->lineMaxLength->text());
     set.setValue("startup", ui->checkStartup->isChecked());
+    set.setValue("subcategory", ui->checkCategories->isChecked());
     set.endGroup();
 
     emit this->reloadFromCacheRequested();
@@ -223,6 +237,9 @@ void SettingsDialog::on_btnSave_clicked() {
 
 void SettingsDialog::on_btnDeleteFeed_clicked() {
     QListWidgetItem *curr = ui->listFeeds->currentItem();
+    if(curr == NULL)
+        return;
+
     QString feedName = curr->data(Qt::UserRole).toString();
 
     //delete from Feeds section

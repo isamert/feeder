@@ -6,6 +6,7 @@ MainTray::MainTray(QWidget *parent)
     //TODO: show notifications
     //TODO: add light theme and dark theme icon
     //TODO: edit feeds
+    //FIXME: open menu when clicked on windows
 
 #ifdef Q_WS_X11
     SPACE = "\t";
@@ -36,7 +37,7 @@ MainTray::MainTray(QWidget *parent)
 }
 
 MainTray::~MainTray() {
-    delete this->menu;
+    //delete this->menu;
     delete this->sd;
     delete this->ad;
 }
@@ -51,26 +52,44 @@ void MainTray::loadFromCache() {
 
     QSettings set;
     set.beginGroup("General");
-    set.value("invertal", 30).toInt();
+    const bool subcategory = set.value("subcategory", false).toBool();
     int maxLength = set.value("maxlength", 35).toInt();
     set.endGroup();
 
+    //add categories
+    QHash<QString, QMenu*> catmenus;
+    if(subcategory) {
+        set.beginGroup("Categories");
+        QStringList cats = set.childKeys();
+        set.endGroup();
+        foreach (QString cat, cats)
+            catmenus[cat] = this->menu->addMenu(cat); //TODO: add icon to categories
+    }
+
     foreach (QString feed, General::getFeeds()) {
+        bool subcategory_temp = subcategory;
+
         set.beginGroup("Feed_" + feed);
 
         QString type = set.value("type", "").toString();
         QString title = set.value("title", "").toString();
         QString cache = set.value("cache", "").toString();
         QString icon = set.value("icon", "").toString();
+        QString category = set.value("category", "").toString();
         QString _readitems = set.value("readitems", "").toString();
         QStringList readitems =  _readitems == "" ? QStringList() : _readitems.split("|||");
         bool submenu = set.value("submenu", false).toBool();
         int limit = set.value("limit").toInt();
 
-        //if(title.count() > maxLength)
-        //    title.remove(maxLength, title.count() - maxLength).append("...");
+        if(category.isEmpty())
+            subcategory_temp = false;
 
-        QMenu *mainAct = this->menu->addMenu(QIcon(icon), title);
+        QMenu *mainAct;
+        if(subcategory_temp)
+            mainAct = catmenus[category]->addMenu(QIcon(icon), title);
+        else
+            mainAct = this->menu->addMenu(QIcon(icon), title);
+
         QString mainLink = "";
 
         if(type == "atom") {
@@ -84,18 +103,22 @@ void MainTray::loadFromCache() {
                 if(entries.count() > i) {
                     QString subTitle = entries[i].title;
 
-                    QAction *act;
-
                     if(readitems.contains(subTitle))
                         continue;
 
                     if(subTitle.count() > maxLength)
                         subTitle.remove(maxLength, subTitle.count() - maxLength).append("...");
 
+                    QAction *act;
+
                     if(submenu)
                         act = mainAct->addAction(QIcon(), subTitle);
-                    else
-                        act = this->menu->addAction(QIcon(), SPACE + subTitle);
+                    else {
+                        if(subcategory_temp)
+                            act = catmenus[category]->addAction(QIcon(), SPACE + subTitle);
+                        else
+                            act = this->menu->addAction(QIcon(), SPACE + subTitle);
+                    }
 
                     QStringList data; //(feedname, link)
                     data << feed << entries[i].link;
@@ -119,18 +142,22 @@ void MainTray::loadFromCache() {
                 if(items.count() > i) {
                     QString subTitle = items[i].title;
 
-                    QAction *act;
-
                     if(readitems.contains(subTitle))
                         continue;
 
                     if(subTitle.count() > maxLength)
                         subTitle.remove(maxLength, subTitle.count() - maxLength).append("...");
 
+                    QAction *act;
+
                     if(submenu)
                         act = mainAct->addAction(QIcon(), subTitle);
-                    else
-                        act = this->menu->addAction(QIcon(), SPACE + subTitle);
+                    else {
+                        if(subcategory_temp)
+                            act = catmenus[category]->addAction(QIcon(), SPACE + subTitle);
+                        else
+                            act = this->menu->addAction(QIcon(), SPACE + subTitle);
+                    }
 
                     QStringList data; //(feedname, link)
                     data << feed << items[i].link;
@@ -158,6 +185,10 @@ void MainTray::loadFromCache() {
         connect(mainAct, SIGNAL(triggered(QAction*)), this, SLOT(markFeedFromAction(QAction*)));
 
         this->menu->addSeparator();
+
+        if(subcategory_temp)
+            catmenus[category]->addSeparator();
+
         set.endGroup();
     }
 }
