@@ -94,49 +94,18 @@ void SettingsDialog::on_btnAddNewCategory_clicked() {
 }
 
 void SettingsDialog::on_btnAdd_clicked() {
-    QString group = ui->lineTitle->text().replace(" ", "").toUpper();
+    QString catname = ui->comboCategories->currentText();
+    if(catname == trUtf8("Empty") || catname == "")
+        catname = "";
 
-    foreach (QString var, General::getFeeds()) {
-        if(var == group) {
-            QMessageBox::warning(this, trUtf8("Cannot Add Feed"), trUtf8("You have same feed already!"));
-            return;
-        }
+    if(General::addFeed(ui->lineAdress->text(), ui->lineTitle->text(), this->currentType, this->currentCache, catname,
+                         ui->lineLimit->text(), ui->checkNotifications->isChecked(), ui->checkSubmenu->isChecked(), ui->lineIcon->text()))
+        QMessageBox::information(this, trUtf8("Feed Added"), trUtf8("Your feed added successfully"));
+    else {
+        QMessageBox::warning(this, trUtf8("Cannot Add Feed"), trUtf8("You have same feed already!"));
+        return;
     }
 
-    QSettings set;
-
-    set.beginGroup("Feeds");
-    set.setValue(group, ui->lineTitle->text());
-    set.endGroup();
-
-    //add to order
-    set.beginGroup("FeedOrder");
-    QStringList orders = set.childKeys();
-    orders.sort();
-
-    int itemOrder;
-    if(orders.isEmpty())
-        itemOrder = 0;
-    else
-        itemOrder = orders.last().toInt() + 1;
-
-    set.setValue(QString::number(itemOrder), group);
-    set.endGroup();
-
-    set.beginGroup("Feed_" + group);
-    set.setValue("url", ui->lineAdress->text());
-    set.setValue("title", ui->lineTitle->text());
-    set.setValue("type", this->currentType);
-    set.setValue("cache", this->currentCache);
-    QString catname = ui->comboCategories->currentText();
-    if(catname == trUtf8("Empty"))
-        catname = "";
-    set.setValue("category", catname);
-    set.setValue("limit", ui->lineLimit->text());
-    set.setValue("notifications", ui->checkNotifications->isChecked());
-    set.setValue("submenu", ui->checkSubmenu->isChecked());
-    set.setValue("icon", ui->lineIcon->text());
-    set.endGroup();
 
     ui->lineAdress->clear();
     ui->lineTitle->clear();
@@ -148,7 +117,6 @@ void SettingsDialog::on_btnAdd_clicked() {
     this->currentCache = "";
     this->currentType = "";
 
-    QMessageBox::information(this, trUtf8("Feed Added"), trUtf8("Your feed added successfully"));
     this->loadSettings();
     emit this->reloadFromCacheRequested();
 }

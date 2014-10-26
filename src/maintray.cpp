@@ -1,4 +1,5 @@
 #include "maintray.h"
+#include "opml.h"
 
 MainTray::MainTray(QWidget *parent)
     : QSystemTrayIcon(parent)
@@ -7,6 +8,10 @@ MainTray::MainTray(QWidget *parent)
     //TODO: add light theme and dark theme icon
     //TODO: edit feeds
     //FIXME: open menu when clicked on windows
+
+    Opml opml;
+    opml.importOpml("/home/isa/isa.opml");
+
 
 #ifdef Q_WS_X11
     SPACE = "\t";

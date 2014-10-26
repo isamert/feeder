@@ -59,3 +59,49 @@ QStringList General::getFeeds() {
     set.endGroup();
     return feeds;
 }
+
+bool General::addFeed(const QString &url, const QString &title, const QString &type, const QString &cache, const QString catname, const QString &limit, bool notifications, bool submenu, const QString icon) {
+    QString group = QString(title).replace(" ", "").toUpper();
+
+    foreach (QString var, General::getFeeds()) {
+        if(var == group) {
+            return false;
+        }
+    }
+
+    QSettings set;
+
+    set.beginGroup("Feeds");
+    set.setValue(group, title);
+    set.endGroup();
+
+    //add to order
+    set.beginGroup("FeedOrder");
+    QStringList orders = set.childKeys();
+    orders.sort();
+
+    int itemOrder;
+    if(orders.isEmpty())
+        itemOrder = 0;
+    else
+        itemOrder = orders.last().toInt() + 1;
+
+    set.setValue(QString::number(itemOrder), group);
+    set.endGroup();
+
+    set.beginGroup("Feed_" + group);
+    set.setValue("url", url);
+    set.setValue("title", title);
+    set.setValue("type", type);
+    set.setValue("cache", cache);
+    set.setValue("category", catname);
+    set.setValue("limit", limit);
+    set.setValue("notifications", notifications);
+    set.setValue("submenu", submenu);
+    set.setValue("icon", icon);
+    set.endGroup();
+
+    return true;
+}
+
+

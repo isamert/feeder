@@ -34,7 +34,8 @@ SOURCES += main.cpp \
     feedsource.cpp \
     general.cpp \
     menu.cpp \
-    aboutdialog.cpp
+    aboutdialog.cpp \
+    opml.cpp
 
 HEADERS  += \
     maintray.h \
@@ -44,7 +45,8 @@ HEADERS  += \
     feedsource.h \
     general.h \
     menu.h \
-    aboutdialog.h
+    aboutdialog.h \
+    opml.h
 
 FORMS += \
     settingsdialog.ui \
