@@ -6,6 +6,8 @@
 #include <QFile>
 #include <QDir>
 #include <QDomDocument>
+#include <QSignalMapper>
+#include <QMessageBox>
 
 #include "feedsource.h"
 
@@ -15,11 +17,13 @@ class Opml : public QObject
 public:
     explicit Opml(QObject *parent = 0);
 
-    FeedSource *fs;
     bool importOpml(const QString &filePath);
     void exportOpml(const QString &filePath);
 
 signals:
+
+public slots:
+    void addFeed(const QString &xmlCacheFilePath);
 
 public slots:
 

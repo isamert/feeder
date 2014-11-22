@@ -17,13 +17,10 @@ class FeedSource : public QObject
     Q_OBJECT
 
 private:
-    QUrl feedUrl;
     QString currentUpdateFeed;
     QNetworkAccessManager *manager;
     QNetworkAccessManager *iconmanager;
     QNetworkAccessManager *updatemanager;
-
-
 
 public:
     enum FileType {
@@ -34,6 +31,13 @@ public:
 
     explicit FeedSource(QObject *parent = 0, const QUrl &feedUrl = QUrl());
     ~FeedSource();
+
+    QString title;
+    QString category;
+    QString htmlUrl;
+    QString xmlUrl;
+    QString url;
+    QUrl feedUrl;
 
     bool downloadFeed();
     bool downloadFeed(const QString &url);

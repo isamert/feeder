@@ -69,6 +69,8 @@ bool General::addFeed(const QString &url, const QString &title, const QString &t
         }
     }
 
+    addCategory(catname); //add the category if does not exists
+
     QSettings set;
 
     set.beginGroup("Feeds");
@@ -104,4 +106,11 @@ bool General::addFeed(const QString &url, const QString &title, const QString &t
     return true;
 }
 
+void General::addCategory(const QString &str) {
+    QSettings set;
+    set.beginGroup("Categories");
+    if(!set.childKeys().contains(str))
+        set.setValue(str, "");
+    set.endGroup();
+}
 

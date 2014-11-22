@@ -84,11 +84,7 @@ void SettingsDialog::on_listFeeds_itemSelectionChanged() {
 }
 
 void SettingsDialog::on_btnAddNewCategory_clicked() {
-    QSettings set;
-    set.beginGroup("Categories");
-    set.setValue(ui->lineNewCategory->text(), "");
-    set.endGroup();
-
+    General::addCategory(ui->lineNewCategory->text());
     ui->lineNewCategory->clear();
     this->loadSettings();
 }
@@ -165,6 +161,7 @@ void SettingsDialog::loadFile(const QString &filePath) {
 }
 
 void SettingsDialog::on_btnSave_clicked() {
+    //TODO: add to windows startup
     bool startup = ui->checkStartup->isChecked();
     if(startup) {
         if(!QFile::exists(General::autostartFile())) {
@@ -282,4 +279,15 @@ void SettingsDialog::on_btnFeedDown_clicked() {
 void SettingsDialog::showAddDialog() {
     ui->tabWidget->setCurrentIndex(1);
     this->show();
+}
+
+void SettingsDialog::on_btnImportOpml_clicked() {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Select file"), "", tr("Opml files (*.opml)"));
+
+    if(!fileName.isEmpty() && QFile::exists(fileName)) {
+        Opml *opml = new Opml();
+        opml->importOpml(fileName);
+    }
+
+    QMessageBox::information(0, trUtf8("Restart required"), trUtf8("Restart Feeder to see new items."));
 }

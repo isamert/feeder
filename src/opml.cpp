@@ -3,9 +3,6 @@
 Opml::Opml(QObject *parent) :
     QObject(parent)
 {
-    this->fs = new FeedSource();
-    connect(fs, SIGNAL(feedDownloadCompleted(QString)), this, SLOT(loadFile(QString)));
-    connect(fs, SIGNAL(iconDownloadCompleted(QString)), ui->lineIcon, SLOT(setText(QString)));
 }
 
 bool Opml::importOpml(const QString &filePath) {
@@ -34,7 +31,20 @@ bool Opml::importOpml(const QString &filePath) {
                 QString xmlUrl = bodychild.toElement().attribute("xmlUrl");
                 QString url = bodychild.toElement().attribute("url");
 
-                //General::addFeed(xmlUrl, text, )
+                FeedSource *fs;
+                fs = new FeedSource();
+
+                fs->category = "";
+                fs->title = text;
+                fs->xmlUrl = xmlUrl;
+                fs->htmlUrl = htmlUrl;
+                fs->url = url;
+                connect(fs, SIGNAL(feedDownloadCompleted(QString)), this, SLOT(addFeed(QString)));
+                //connect(fs, SIGNAL(iconDownloadCompleted(QString)), this, SLOT(setIcon()));
+                //FIXME: cannot load icon
+
+                fs->downloadFeed(QUrl::fromUserInput(xmlUrl));
+                //fs->downloadIcon();
             }
         }
         else {
@@ -48,6 +58,21 @@ bool Opml::importOpml(const QString &filePath) {
                     QString htmlUrl = items.item(j).toElement().attribute("htmlUrl");
                     QString xmlUrl = items.item(j).toElement().attribute("xmlUrl");
                     QString url = items.item(j).toElement().attribute("url");
+
+                    FeedSource *fs;
+                    fs = new FeedSource();
+
+                    fs->category = category;
+                    fs->title = text.replace("/","").replace(".", "");
+                    fs->xmlUrl = xmlUrl;
+                    fs->htmlUrl = htmlUrl;
+                    fs->url = url;
+                    connect(fs, SIGNAL(feedDownloadCompleted(QString)), this, SLOT(addFeed(QString)));
+                    //connect(fs, SIGNAL(iconDownloadCompleted(QString)), this, SLOT(setIcon()));
+                    //FIXME: cannot load icon
+
+                    fs->downloadFeed(QUrl::fromUserInput(xmlUrl));
+                    //fs->downloadIcon();
                 }
             }
         }
@@ -57,3 +82,25 @@ bool Opml::importOpml(const QString &filePath) {
 void Opml::exportOpml(const QString &filePath) {
     //TODO: export opml
 }
+
+void Opml::addFeed(const QString &xmlCacheFilePath) {
+    FeedSource* fs = dynamic_cast<FeedSource*>(sender());
+
+    QString type_;
+    int type = FeedSource::fileType(xmlCacheFilePath);
+    if(type == FeedSource::AtomFile)
+        type_ = "atom";
+    else if(type == FeedSource::RssFile)
+        type_ = "rss";
+    else {
+        QMessageBox::warning(0, trUtf8("Cannot Add File"), trUtf8("Cannot add:") + fs->title);
+        fs->deleteLater();
+        return;
+    }
+
+    General::addFeed(fs->feedUrl.toString(), fs->title, type_, xmlCacheFilePath, fs->category, "5", false, false, "");
+
+    fs->deleteLater();
+}
+
+

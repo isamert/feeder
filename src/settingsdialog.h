@@ -4,11 +4,13 @@
 #include <QDialog>
 #include <QMessageBox>
 #include <QCloseEvent>
+#include <QFileDialog>
 #include <QApplication>
 
 #include "feedsource.h"
 #include "rssreader.h"
 #include "atomreader.h"
+#include "opml.h"
 
 namespace Ui {
 class SettingsDialog;
@@ -44,6 +46,7 @@ private slots:
     void on_btnDeleteCategory_clicked();
     void on_btnFeedUp_clicked();
     void on_btnFeedDown_clicked();
+    void on_btnImportOpml_clicked();
 
     void showAddDialog();
 
