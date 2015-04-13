@@ -93,7 +93,7 @@ void Opml::addFeed(const QString &xmlCacheFilePath) {
     else if(type == FeedSource::RssFile)
         type_ = "rss";
     else {
-        QMessageBox::warning(0, trUtf8("Cannot Add File"), trUtf8("Cannot add:") + fs->title);
+        QMessageBox::warning(0, trUtf8("Cannot Add Feed"), trUtf8("Cannot add:") + fs->title);
         fs->deleteLater();
         return;
     }

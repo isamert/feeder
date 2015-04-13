@@ -22,15 +22,22 @@ class SettingsDialog : public QDialog
 
 private:
     Ui::SettingsDialog *ui;
+
     FeedSource *fs;
     QString currentType;
     QString currentCache;
+
+    FeedSource *fs_updater;
+    QString currentEditCache;
+    QString currentEditName;
+    QString currentEditFeedUri;
 
 public:
     explicit SettingsDialog(QWidget *parent = 0);
     ~SettingsDialog();
     void loadSettings();
     void saveFeedOrder();
+    void openEditFeedTab(const QString &feedName);
 
 private slots:
     void on_lineAdress_textChanged(const QString &arg1);
@@ -50,8 +57,14 @@ private slots:
 
     void showAddDialog();
 
+    void on_btnUpdateFeed_clicked();
+    void on_btnEditFeed_clicked();
+
+    void on_btnEditLoad_clicked();
+
 public slots:
     void loadFile(const QString &filePath);
+    void updateFeedText(const QString &filePath);
 
 signals:
     void reloadFromCacheRequested();

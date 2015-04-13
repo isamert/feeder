@@ -114,3 +114,19 @@ void General::addCategory(const QString &str) {
     set.endGroup();
 }
 
+void General::sendNotify(const QString &title, const QString &message, const int second /* = 3 */, const QString image /* = "" */) {
+#ifdef Q_WS_X11
+    QString imageCommand = "";
+    if(!image.isEmpty() && QFile::exists(image))
+        imageCommand = " -i " + image;
+
+    int ms = second * 1000;
+
+    QString cmd = "notify-send '" + title + "' '" + message + "' -t " +  QString::number(ms) + imageCommand;
+    std::string stdstr = cmd.toUtf8().constData();
+    system(stdstr.c_str());
+#elif Q_OS_WIN32
+    //TODO: do stuff here
+#endif
+}
+

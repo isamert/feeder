@@ -17,7 +17,13 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     connect(fs, SIGNAL(feedDownloadCompleted(QString)), this, SLOT(loadFile(QString)));
     connect(fs, SIGNAL(iconDownloadCompleted(QString)), ui->lineIcon, SLOT(setText(QString)));
 
+    this->fs_updater = new FeedSource();
+    connect(fs_updater, SIGNAL(feedDownloadCompleted(QString)), this, SLOT(updateFeedText(QString)));
+    connect(fs_updater, SIGNAL(iconDownloadCompleted(QString)), ui->lineEditIcon, SLOT(setText(QString)));
+
     this->loadSettings();
+
+    ui->tab_6->setEnabled(false);
 }
 
 SettingsDialog::~SettingsDialog() {
@@ -37,13 +43,19 @@ void SettingsDialog::loadSettings() {
         ui->comboCategories->addItem(cat);
         ui->listCategories->addItem(cat);
     }
+
+    ui->comboEditCategories->addItem(trUtf8("Empty"));
+    foreach(QString cat, set.childKeys()) {
+        ui->comboEditCategories->addItem(cat);
+    }
+
     set.endGroup();
 
     /* load feeds */
     ui->listFeeds->clear();
 
     set.beginGroup("Feeds");
-    foreach (QString feed, General::getFeeds()) {
+    foreach(QString feed, General::getFeeds()) {
         QListWidgetItem *item = new QListWidgetItem(ui->listFeeds);
         item->setText(set.value(feed).toString());
         item->setData(Qt::UserRole, feed);
@@ -56,8 +68,11 @@ void SettingsDialog::loadSettings() {
     ui->lineUpdateInvertal->setText(set.value("invertal", "30").toString());
     ui->lineMaxLength->setText(set.value("maxlength", "35").toString());
     ui->checkCategories->setChecked(set.value("subcategory", false).toBool());
+    QString icon = set.value("icon", ":/images/standart.png").toString();
+    ui->iconBlack->setChecked(icon == ":/images/black.png");
+    ui->iconWhite->setChecked(icon == ":/images/white.png");
+    ui->iconStandart->setChecked(icon == ":/images/standart.png");
     set.endGroup();
-
 }
 
 void SettingsDialog::on_lineAdress_textChanged(const QString &arg1) {
@@ -80,6 +95,13 @@ void SettingsDialog::on_listFeeds_itemSelectionChanged() {
         ui->btnDeleteFeed->setEnabled(true);
         ui->btnFeedDown->setEnabled(true);
         ui->btnFeedUp->setEnabled(true);
+        ui->btnEditFeed->setEnabled(true);
+    }
+    else {
+        ui->btnDeleteFeed->setEnabled(false);
+        ui->btnFeedDown->setEnabled(false);
+        ui->btnFeedUp->setEnabled(false);
+        ui->btnEditFeed->setEnabled(false);
     }
 }
 
@@ -155,9 +177,8 @@ void SettingsDialog::loadFile(const QString &filePath) {
         ui->lineTitle->setText(info.title);
         this->currentType = "rss";
     }
-    else {
+    else
         ui->lineTitle->setText(trUtf8("Error while loading file"));
-    }
 }
 
 void SettingsDialog::on_btnSave_clicked() {
@@ -195,8 +216,14 @@ void SettingsDialog::on_btnSave_clicked() {
     set.setValue("maxlength", ui->lineMaxLength->text());
     set.setValue("startup", ui->checkStartup->isChecked());
     set.setValue("subcategory", ui->checkCategories->isChecked());
+
+    QString icon = ":/images/standart.png";
+    icon = ui->iconBlack->isChecked() ? ":/images/black.png":icon;
+    icon = ui->iconWhite->isChecked() ? ":/images/white.png":icon;
+    set.setValue("icon", icon);
     set.endGroup();
 
+    QMessageBox::information(0, trUtf8("Saved"), trUtf8("Settings saved successfully."));
     emit this->reloadFromCacheRequested();
 }
 
@@ -290,4 +317,109 @@ void SettingsDialog::on_btnImportOpml_clicked() {
     }
 
     QMessageBox::information(0, trUtf8("Restart required"), trUtf8("Restart Feeder to see new items."));
+}
+
+void SettingsDialog::updateFeedText(const QString &filePath) {
+    ui->btnAdd->setEnabled(true);
+
+    int type = FeedSource::fileType(filePath);
+    this->currentEditCache = filePath;
+
+    if(type == FeedSource::AtomFile) {
+        AtomReader ar;
+        ar.setDocument(filePath);
+
+        AtomReader::ChannelInfo info = ar.getChannelInfo();
+        ui->lineEditTitle->setText(info.title);
+    }
+    else if(type == FeedSource::RssFile) {
+        RssReader rr;
+        rr.setDocument(filePath);
+
+        RssReader::ChannelInfo info = rr.getChannelInfo();
+        ui->lineEditTitle->setText(info.title);
+    }
+    else
+        ui->lineEditTitle->setText(trUtf8("Error while loading file"));
+}
+
+void SettingsDialog::on_btnUpdateFeed_clicked() {
+    QString catname = ui->comboEditCategories->currentText();
+    if(catname == trUtf8("Empty") || catname == "")
+        catname = "";
+
+    QSettings set;
+    set.beginGroup("Feed_" + this->currentEditName);
+    set.setValue("cache", this->currentEditCache);
+    set.setValue("icon", ui->lineEditIcon->text());
+    set.setValue("limit", ui->lineEditLimit->text());
+    set.setValue("title", ui->lineEditTitle->text());
+    set.setValue("category", catname);
+    set.setValue("notifications", ui->checkEditNotifications->isChecked());
+    set.setValue("submenu", ui->checkEditSubmenu->isChecked());
+    set.endGroup();
+
+    emit this->reloadFromCacheRequested();
+
+    ui->lineEditAdress->clear();
+    ui->lineEditIcon->clear();
+    ui->lineEditLimit->clear();
+    ui->lineEditTitle->clear();
+    this->currentEditCache = "";
+    this->currentEditName = "";
+
+    ui->btnUpdateFeed->setEnabled(false);
+    ui->tab_6->setEnabled(false);
+    ui->tabWidget->setCurrentIndex(2);
+    QMessageBox::information(0, trUtf8("Feed Updated"), trUtf8("Feed information has updated."));
+}
+
+void SettingsDialog::openEditFeedTab(const QString &feedName) {
+    QSettings set;
+    set.beginGroup("Feed_" + feedName);
+    this->currentEditName = feedName;
+    this->currentEditCache = set.value("cache", "").toString();
+    this->currentEditFeedUri = set.value("url", "").toString();
+    ui->lineEditAdress->setText(set.value("url", "").toString());
+    ui->lineEditIcon->setText(set.value("icon", "").toString());
+    ui->lineEditLimit->setText(set.value("limit", "").toString());
+    ui->lineEditTitle->setText(set.value("title", "").toString());
+    ui->checkEditNotifications->setChecked(set.value("notifications", true).toBool());
+    ui->checkEditSubmenu->setChecked(set.value("submenu", false).toBool());
+    QString catname = set.value("category", "").toString();
+
+    int count = ui->comboEditCategories->count();
+    for(int i = 0; i < count; ++i) {
+        QString itemtext = ui->comboEditCategories->itemText(i);
+        if(itemtext == catname) {
+            ui->comboEditCategories->setCurrentIndex(i);
+            break;
+        }
+        else if(catname == "") {
+            if(itemtext == trUtf8("Empty")) {
+                ui->comboEditCategories->setCurrentIndex(i);
+                break;
+            }
+        }
+    }
+    set.endGroup();
+
+    ui->btnUpdateFeed->setEnabled(true);
+    ui->tab_6->setEnabled(true);
+    ui->tabWidget->setCurrentIndex(5);
+    this->show();
+}
+
+void SettingsDialog::on_btnEditFeed_clicked() {
+    QListWidgetItem *curr = ui->listFeeds->currentItem();
+    if(curr == NULL)
+        return;
+
+    QString feedName = curr->data(Qt::UserRole).toString();
+    this->openEditFeedTab(feedName);
+}
+
+void SettingsDialog::on_btnEditLoad_clicked() {
+    this->fs_updater->downloadFeed(this->currentEditFeedUri);
+    this->fs_updater->downloadIcon();
 }

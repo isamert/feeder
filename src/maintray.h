@@ -30,7 +30,7 @@ public:
 
     QString SPACE;
 
-    void loadFromCache();
+    void loadFromCache(const QString &notifyFeed = "");
     void addDefaultItems();
     void updateCache();
     void markFeedAsRead(const QString &feed);
@@ -44,7 +44,9 @@ public slots:
 
     void markAllAsRead();
     void markAllAsUnread();
-    void markFeedFromAction(QAction *act);
+    void feedMenuClicked(QAction *act);
+
+    void onFeedUpdated(const QString &feed);
 };
 
 #endif // MAINTRAY_H

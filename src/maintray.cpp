@@ -3,11 +3,9 @@
 MainTray::MainTray(QWidget *parent)
     : QSystemTrayIcon(parent)
 {
-    //TODO: show notifications
     //TODO: add light theme and dark theme icon
-    //TODO: edit feeds
+    //TODO: opml ile eklenen feedleri Feeds kısmına ekleyiver
     //FIXME: open menu when clicked on windows
-
 
 #ifdef Q_WS_X11
     SPACE = "\t";
@@ -21,13 +19,13 @@ MainTray::MainTray(QWidget *parent)
     this->sd = new SettingsDialog();
     this->ad = new AboutDialog();
     connect(this->sd, SIGNAL(reloadFromCacheRequested()), this, SLOT(reloadFromCache()));
-    this->setIcon(QIcon(":/images/feed-32x32.png"));
 
     this->setContextMenu(this->menu);
 
     QSettings set;
     set.beginGroup("General");
     int minute = set.value("invertal", 30).toInt();
+    this->setIcon(QIcon(set.value("icon", ":/images/standart.png").toString()));
     set.endGroup();
 
     this->refreshAll();
@@ -48,8 +46,9 @@ void MainTray::reloadFromCache() {
     this->addDefaultItems();
 }
 
-void MainTray::loadFromCache() {
+void MainTray::loadFromCache(const QString &notifyFeed) {
     this->menu->clear();
+    QStringList listNotify;
 
     QSettings set;
     set.beginGroup("General");
@@ -64,7 +63,7 @@ void MainTray::loadFromCache() {
         QStringList cats = set.childKeys();
         set.endGroup();
         foreach (QString cat, cats)
-            catmenus[cat] = this->menu->addMenu(cat); //TODO: add icon to categories
+                catmenus[cat] = this->menu->addMenu(cat); //TODO: add icon to categories
     }
 
     foreach (QString feed, General::getFeeds()) {
@@ -77,6 +76,7 @@ void MainTray::loadFromCache() {
         QString cache = set.value("cache", "").toString();
         QString icon = set.value("icon", "").toString();
         QString category = set.value("category", "").toString();
+        bool notifications = set.value("notifications", false).toBool();
         QString _readitems = set.value("readitems", "").toString();
         QStringList readitems =  _readitems == "" ? QStringList() : _readitems.split("|||");
         bool submenu = set.value("submenu", false).toBool();
@@ -129,6 +129,9 @@ void MainTray::loadFromCache() {
 
                     int unreadCount = readitems.count() == 0 ? ar.totalCount() - readitems.count():ar.totalCount() - readitems.count() + 1;
                     mainAct->setTitle(QString("(%1) " + title).arg(unreadCount));
+
+                    if(notifications && feed == notifyFeed && !notifyFeed.isEmpty())
+                        listNotify.append(QString("[%1] - %2").arg(title, subTitle));
                 }
             }
         }
@@ -168,6 +171,9 @@ void MainTray::loadFromCache() {
 
                     int unreadCount = readitems.count() == 0 ? rr.totalCount() - readitems.count():rr.totalCount() - readitems.count() + 1;
                     mainAct->setTitle(QString("(%1) " + title).arg(unreadCount));
+
+                    if(notifications && feed == notifyFeed && !notifyFeed.isEmpty())
+                        listNotify.append(QString("[%1] - %2").arg(title, subTitle));
                 }
             }
         }
@@ -180,10 +186,14 @@ void MainTray::loadFromCache() {
         mainAct->addSeparator();
         QAction *actRead = mainAct->addAction(trUtf8("Mark as read"));
         QAction *actUnread = mainAct->addAction(trUtf8("Mark as unread"));
+        mainAct->addSeparator();
+        QAction *actEdit = mainAct->addAction(trUtf8("Edit"));
+
         actRead->setData(QStringList("__READ__" + feed));
         actUnread->setData(QStringList("__UNREAD__" + feed));
+        actEdit->setData(QStringList("__EDIT__" + feed));
 
-        connect(mainAct, SIGNAL(triggered(QAction*)), this, SLOT(markFeedFromAction(QAction*)));
+        connect(mainAct, SIGNAL(triggered(QAction*)), this, SLOT(feedMenuClicked(QAction*)));
 
         this->menu->addSeparator();
 
@@ -192,6 +202,10 @@ void MainTray::loadFromCache() {
 
         set.endGroup();
     }
+
+    QString strNotify = listNotify.join("\n").replace('"', "").replace("(", "").replace(")", "").replace("'", "");
+    if(!strNotify.isEmpty())
+        General::sendNotify(trUtf8("Feeder"), strNotify);
 }
 
 void MainTray::addDefaultItems() {
@@ -213,11 +227,17 @@ void MainTray::updateCache() {
             FeedSource *fs;
             fs = new FeedSource();
             fs->updateFeed(feed);
-            connect(fs, SIGNAL(feedUpdated(QString)), this, SLOT(reloadFromCache()));
+            connect(fs, SIGNAL(feedUpdated(QString)), this, SLOT(onFeedUpdated(QString)));
         }
     }
     else
         this->reloadFromCache();
+}
+
+void MainTray::onFeedUpdated(const QString &feed) {
+    this->loadFromCache(feed);
+    this->addDefaultItems();
+    //do some amazing stuff
 }
 
 void MainTray::refreshAll() {
@@ -277,7 +297,7 @@ void MainTray::markAllAsUnread() {
     this->reloadFromCache();
 }
 
-void MainTray::markFeedFromAction(QAction *act) {
+void MainTray::feedMenuClicked(QAction *act) {
     QStringList data = act->data().toStringList();
     QString action = data[0];
 
@@ -285,6 +305,9 @@ void MainTray::markFeedFromAction(QAction *act) {
         this->markFeedAsRead(action.remove("__READ__"));
     else if(action.startsWith("__UNREAD__"))
         this->markFeedAsUnread(action.remove("__UNREAD__"));
+    else if(action.startsWith("__EDIT__"))
+        this->sd->openEditFeedTab(action.remove("__EDIT__"));
+
 
     this->reloadFromCache();
 }

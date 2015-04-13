@@ -23,6 +23,7 @@ public:
     static QStringList getFeeds();
     static bool addFeed(const QString &url, const QString &title, const QString &type, const QString &cache, const QString catname, const QString &limit, bool notifications, bool submenu, const QString ico);
     static void addCategory(const QString &str);
+    static void sendNotify(const QString &title, const QString &message, const int second = 3, const QString image = "");
 };
 
 #endif // GENERAL_H
