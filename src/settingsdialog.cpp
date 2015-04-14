@@ -71,6 +71,7 @@ void SettingsDialog::loadSettings() {
     ui->lineMaxLength->setText(set.value("maxlength", "35").toString());
     ui->checkCategories->setChecked(set.value("subcategory", false).toBool());
     QString icon = set.value("icon", "feeder-standart").toString();
+    ui->iconOrange->setChecked(icon == "feeder-orange");
     ui->iconBlack->setChecked(icon == "feeder-black");
     ui->iconWhite->setChecked(icon == "feeder-white");
     ui->iconStandart->setChecked(icon == "feeder-standart");
@@ -220,7 +221,8 @@ void SettingsDialog::on_btnSave_clicked() {
     set.setValue("subcategory", ui->checkCategories->isChecked());
 
     QString icon = "feeder-standart";
-    icon = ui->iconBlack->isChecked() ? ":feeder-black":icon;
+    icon = ui->iconOrange->isChecked() ? "feeder-orange":icon;
+    icon = ui->iconBlack->isChecked() ? "feeder-black":icon;
     icon = ui->iconWhite->isChecked() ? "feeder-white":icon;
     set.setValue("icon", icon);
     set.endGroup();
