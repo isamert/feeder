@@ -21,7 +21,7 @@ target.path = /usr/bin
 desktop.files = ../files/$${TARGET}.desktop
 desktop.path = /usr/share/applications
 
-icon.files = ../files/$${TARGET}.png
+icon.files = ../files/*.png
 icon.path = /usr/share/pixmaps
 
 INSTALLS += target desktop icon

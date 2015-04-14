@@ -40,8 +40,10 @@ void SettingsDialog::loadSettings() {
     set.beginGroup("Categories");
     ui->comboCategories->addItem(trUtf8("Empty"));
     foreach(QString cat, set.childKeys()) {
-        ui->comboCategories->addItem(cat);
-        ui->listCategories->addItem(cat);
+        if(!(cat.isEmpty() || cat == "" || cat == " ")) {
+            ui->comboCategories->addItem(cat);
+            ui->listCategories->addItem(cat);
+        }
     }
 
     ui->comboEditCategories->addItem(trUtf8("Empty"));
@@ -68,10 +70,10 @@ void SettingsDialog::loadSettings() {
     ui->lineUpdateInvertal->setText(set.value("invertal", "30").toString());
     ui->lineMaxLength->setText(set.value("maxlength", "35").toString());
     ui->checkCategories->setChecked(set.value("subcategory", false).toBool());
-    QString icon = set.value("icon", ":/images/standart.png").toString();
-    ui->iconBlack->setChecked(icon == ":/images/black.png");
-    ui->iconWhite->setChecked(icon == ":/images/white.png");
-    ui->iconStandart->setChecked(icon == ":/images/standart.png");
+    QString icon = set.value("icon", "feeder-standart").toString();
+    ui->iconBlack->setChecked(icon == "feeder-black");
+    ui->iconWhite->setChecked(icon == "feeder-white");
+    ui->iconStandart->setChecked(icon == "feeder-standart");
     set.endGroup();
 }
 
@@ -217,9 +219,9 @@ void SettingsDialog::on_btnSave_clicked() {
     set.setValue("startup", ui->checkStartup->isChecked());
     set.setValue("subcategory", ui->checkCategories->isChecked());
 
-    QString icon = ":/images/standart.png";
-    icon = ui->iconBlack->isChecked() ? ":/images/black.png":icon;
-    icon = ui->iconWhite->isChecked() ? ":/images/white.png":icon;
+    QString icon = "feeder-standart";
+    icon = ui->iconBlack->isChecked() ? ":feeder-black":icon;
+    icon = ui->iconWhite->isChecked() ? "feeder-white":icon;
     set.setValue("icon", icon);
     set.endGroup();
 
@@ -258,6 +260,10 @@ void SettingsDialog::on_btnDeleteCategory_clicked() {
     //TODO: remove all sub-feeds
     QListWidgetItem *curr = ui->listCategories->currentItem();
     if(curr == NULL)
+        return;
+
+    QString catname = curr->text();
+    if(catname.isEmpty() || catname == "" || catname == " ")
         return;
 
     QSettings set;
@@ -314,9 +320,9 @@ void SettingsDialog::on_btnImportOpml_clicked() {
     if(!fileName.isEmpty() && QFile::exists(fileName)) {
         Opml *opml = new Opml();
         opml->importOpml(fileName);
-    }
 
-    QMessageBox::information(0, trUtf8("Restart required"), trUtf8("Restart Feeder to see new items."));
+        QMessageBox::information(0, trUtf8("Restart required"), trUtf8("Restart Feeder to see new items."));
+    }
 }
 
 void SettingsDialog::updateFeedText(const QString &filePath) {

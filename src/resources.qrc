@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/images">
-        <file>standart.png</file>
-        <file>white.png</file>
-        <file>black.png</file>
+        <file>feeder-standart.png</file>
+        <file>feeder-white.png</file>
+        <file>feeder-black.png</file>
     </qresource>
 </RCC>

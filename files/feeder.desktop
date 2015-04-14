@@ -2,7 +2,7 @@
 Version=0.9
 Type=Application
 Name=Feeder
-Icon=feeder
+Icon=feeder-standart
 Exec=feeder
 Comment=A simple rss/atom reader
 Categories=Utility;

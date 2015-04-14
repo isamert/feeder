@@ -25,7 +25,8 @@ MainTray::MainTray(QWidget *parent)
     QSettings set;
     set.beginGroup("General");
     int minute = set.value("invertal", 30).toInt();
-    this->setIcon(QIcon(set.value("icon", ":/images/standart.png").toString()));
+    QString iconName = set.value("icon", "feeder-standart").toString();
+    this->setIcon(QIcon::fromTheme(iconName, QIcon(":/images/" + iconName +".png")));
     set.endGroup();
 
     this->refreshAll();
@@ -62,8 +63,10 @@ void MainTray::loadFromCache(const QString &notifyFeed) {
         set.beginGroup("Categories");
         QStringList cats = set.childKeys();
         set.endGroup();
-        foreach (QString cat, cats)
+        foreach (QString cat, cats) {
+            if(!(cat.isEmpty() || cat == "" || cat == " "))
                 catmenus[cat] = this->menu->addMenu(cat); //TODO: add icon to categories
+        }
     }
 
     foreach (QString feed, General::getFeeds()) {
@@ -82,7 +85,7 @@ void MainTray::loadFromCache(const QString &notifyFeed) {
         bool submenu = set.value("submenu", false).toBool();
         int limit = set.value("limit").toInt();
 
-        if(category.isEmpty())
+        if(category.isEmpty() || category == "" || category == " ")
             subcategory_temp = false;
 
         QMenu *mainAct;
